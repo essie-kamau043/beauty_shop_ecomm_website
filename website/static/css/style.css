@@ -1,0 +1,179 @@
+@import url(./clash-display.css);
+
+/* VARIABLES */
+:root {
+  --c-dark: #2c0000;
+  --c-brand: #FF2D81;
+  --c-brand-light: #fcfcfc;
+  --c-brand-rgb: 42, 108, 162;
+  --c-body: #E8E7E8;
+  --font-base: "ClashDisplay", sans-serif;
+  --box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.08);
+  --transition: all 0.5s ease;
+}
+
+body {
+  font-family: var(--font-base);
+  background-image: url(../images/BACKGRblurred.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--c-body);
+}
+
+.navbar {
+  background-color: none;
+  position: sticky;
+  top: 0; /* Stick to the top of the page */
+  z-index: 1000; /* Ensure the navbar stays above other content */
+}
+
+.search-container {
+  background-color: white;
+  border-radius: 50px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 2px;
+  max-width: 500px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.search-container:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.form-control.search-input {
+  border: none;
+  background: transparent;
+  padding-left: 20px;
+  font-size: 1rem;
+  height: 50px;
+}
+
+.form-control.search-input:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.search_btn {
+  background-color: var(--c-brand);
+  color: white;
+  border-radius: 50px;
+  padding: 10px 20px;
+  margin-right: 5px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.search_btn:hover {
+  background-color: brown;
+  transform: scale(1.05);
+}
+
+.search-icon {
+  color: #6c757d;
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+h1,
+h5,
+.h6 {
+  font-weight: 600;
+  color: var(--c-brand-light);
+}
+
+p {
+  color: white;
+}
+
+a {
+  font-size: 17px;
+  text-decoration: none;
+  
+}
+
+a:hover {
+  color: var(--c-brand-light);
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.show {
+  color: var(--c-brand);
+  font-size: 19px;
+  font-family: var(--font-base);
+}
+
+.custom-btn {
+  border-color: #FF2D81; /* Outline color */
+  color: #FF2D81; /* Text color */
+}
+
+.custom-btn:hover {
+  background-color: #FF2D81; /* Background color on hover */
+  color: white; /* Text color on hover */
+}
+
+.custom-btn:active {
+  background-color: #FF2D81; /* Background color on click */
+  color: white; /* Text color on click */
+}
+
+.list-group-item {
+    position: relative;
+    display: block;
+    padding: var(--bs-list-group-item-padding-y) var(--bs-list-group-item-padding-x);
+    color: var(--c-brand-light);
+    text-decoration: none;
+    background-color: rgba(82, 81, 82, 0.5);;
+    border: var(--bs-list-group-border-width) solid var(--c-brand);
+}
+
+.d-flex .btn {
+  background: var(--c-brand);
+  border: 2px solid var(--c-dark);
+  border-radius: 8px;
+  color: #fff;
+}
+.d-flex .btn:hover {
+  background: var(--c-dark);
+  border: 2px solid var(--c-brand);
+}
+
+#right1 :hover {
+  color: var(--c-brand);
+  transition: 300ms;
+}
+
+.row .right2 {
+  margin-left: -10px;
+  height: 180px;
+  width: 180px;
+  border-radius: 10px;
+}
+
+.container .row .col .row .col a {
+  background-color: var(--c-brand);
+  padding: 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: white;
+}
+
+.container .row .col .row .col a :hover {
+  background-color: var(--c-brand);
+}
+#column :hover {
+  transform: scale(0.9);
+  transition: 450ms;
+  border-radius: 10px;
+}
+
+#items :hover {
+  color: var(--c-brand);
+  transition: 200ms;
+}
+
