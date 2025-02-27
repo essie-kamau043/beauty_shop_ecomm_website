@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} Wishlist {% endblock %}
+{% block title %}Wishlist{% endblock %}
 
 {% block body %}
 <div class="container my-5">
@@ -17,12 +17,11 @@
 </div>
 
 <script>
-    // Retrieve wishlist items from local storage
-    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-    const wishlistItemsDiv = document.getElementById('wishlistItems');
-
     function renderWishlist() {
-        wishlistItemsDiv.innerHTML = ''; // Clear existing items
+        const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+        const wishlistItemsDiv = document.getElementById('wishlistItems');
+        wishlistItemsDiv.innerHTML = '';
+
         if (wishlist.length > 0) {
             wishlist.forEach(item => {
                 const itemDiv = document.createElement('div');
@@ -47,27 +46,6 @@
         }
     }
 
-    function addToCart(productName, productPrice) {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const existingProduct = cart.find(item => item.productName === productName);
-
-        if (existingProduct) {
-            existingProduct.quantity += 1; // Increase quantity if already in cart
-        } else {
-            cart.push({ productName, productPrice, quantity: 1 }); // Add new product to cart
-        }
-
-        localStorage.setItem('cart', JSON.stringify(cart));
-        alert(`${productName} has been added to your cart!`);
-    }
-
-    function removeFromWishlist(productName) {
-        const updatedWishlist = wishlist.filter(item => item.productName !== productName);
-        localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-        renderWishlist(); // Update the display after removal
-    }
-
-    // Initial render of the wishlist
-    renderWishlist();
+    document.addEventListener('DOMContentLoaded', renderWishlist);
 </script>
 {% endblock %}

@@ -102,3 +102,8 @@ def change_password(customer_id):
             flash('Current Password is Incorrect')
 
     return render_template('change_password.html', form=form)
+
+@auth.route('/wishlist')
+@login_required
+def wishlist():
+    return render_template('wishlist.html')
