@@ -44,6 +44,7 @@ def sign_up():
 
     return render_template('signup.html', form=form)
 
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -64,6 +65,7 @@ def login():
             flash('Account does not exist. Please Sign Up.')
 
     return render_template('login.html', form=form)
+
 
 @auth.route('/logout', methods=['GET', 'POST'])
 @login_required
