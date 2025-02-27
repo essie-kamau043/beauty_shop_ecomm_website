@@ -5,7 +5,6 @@ from . import db
 from intasend import APIService
 
 
-
 views = Blueprint('views', __name__)
 
 API_PUBLISHABLE_KEY = 'ISPubKey_live_1577ccf6-881c-4711-a6a5-f0699797b0e5'
@@ -22,20 +21,47 @@ def home():
                            if current_user.is_authenticated else [])
 
 
+@views.route('/products')
+def products():
+    # Get filter parameters from the request
+    min_price = request.args.get('min_price', type=float)
+    max_price = request.args.get('max_price', type=float)
+    category_id = request.args.get('category_id', type=int)
+    flash_sale = request.args.get('flash_sale', type=bool)
+
+    query = Product.query
+
+    if min_price is not None:
+        query = query.filter(Product.current_price >= min_price)
+    if max_price is not None:
+        query = query.filter(Product.current_price <= max_price)
+    if category_id is not None:
+        query = query.filter_by(category_id=category_id)
+    if flash_sale is not None:
+        query = query.filter_by(flash_sale=flash_sale)
+
+    filtered_products = query.all()
+
+    return render_template('products.html', products=filtered_products)
+
+
 @views.route('/add-to-cart/<int:item_id>')
 @login_required
 def add_to_cart(item_id):
     item_to_add = Product.query.get(item_id)
-    item_exists = Cart.query.filter_by(product_link=item_id, customer_link=current_user.id).first()
+    item_exists = Cart.query.filter_by(
+        product_link=item_id, customer_link=current_user.id).first()
     if item_exists:
         try:
             item_exists.quantity = item_exists.quantity + 1
             db.session.commit()
-            flash(f' Quantity of { item_exists.product.product_name } has been updated')
+            flash(
+                f' Quantity of { item_exists.product.product_name } has been updated')
             return redirect(request.referrer)
         except Exception as e:
             print('Quantity not Updated', e)
-            flash(f'Quantity of { item_exists.product.product_name } not updated')
+            flash(
+                f'Quantity of { item_exists.product.product_name } not updated')
             return redirect(request.referrer)
 
     new_cart_item = Cart()
@@ -150,7 +176,8 @@ def place_order():
             for item in customer_cart:
                 total += item.product.current_price * item.quantity
 
-            service = APIService(token=API_TOKEN, publishable_key=API_PUBLISHABLE_KEY, test=True)
+            service = APIService(
+                token=API_TOKEN, publishable_key=API_PUBLISHABLE_KEY, test=True)
             create_order_response = service.collect.mpesa_stk_push(phone_number='YOUR_NUMBER ', email=current_user.email,
                                                                    amount=total + 200, narrative='Purchase of goods')
 
@@ -158,7 +185,8 @@ def place_order():
                 new_order = Order()
                 new_order.quantity = item.quantity
                 new_order.price = item.product.current_price
-                new_order.status = create_order_response['invoice']['state'].capitalize()
+                new_order.status = create_order_response['invoice']['state'].capitalize(
+                )
                 new_order.payment_id = create_order_response['id']
 
                 new_order.product_link = item.product_link
@@ -197,22 +225,19 @@ def order():
 def search():
     if request.method == 'POST':
         search_query = request.form.get('search')
-        items = Product.query.filter(Product.product_name.ilike(f'%{search_query}%')).all()
+        items = Product.query.filter(
+            Product.product_name.ilike(f'%{search_query}%')).all()
         return render_template('search.html', items=items, cart=Cart.query.filter_by(customer_link=current_user.id).all()
-                           if current_user.is_authenticated else [])
+                               if current_user.is_authenticated else [])
+
+
+@views.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@views.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
     return render_template('search.html')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
