@@ -43,3 +43,4 @@ class Config:
 
 # Print out the final database URI to confirm it's correctly formatted
 print(f"✅ DATABASE URI: {Config.SQLALCHEMY_DATABASE_URI}")
+ 

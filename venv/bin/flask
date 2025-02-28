@@ -1,4 +1,6 @@
-#!/home/bravvjr/Documents/my_flask_gaming_app/venv/bin/python3
+#!/bin/sh
+'''exec' "/home/bravvjr/Documents/Phase 5/beauty_shop_ecomm_website/venv/bin/python3" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
