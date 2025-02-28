@@ -29,8 +29,10 @@ def products():
     category_id = request.args.get('category_id', type=int)
     flash_sale = request.args.get('flash_sale', type=bool)
 
+    # Start with a base query
     query = Product.query
 
+    # Apply filters based on request parameters
     if min_price is not None:
         query = query.filter(Product.current_price >= min_price)
     if max_price is not None:
@@ -39,11 +41,34 @@ def products():
         query = query.filter_by(category_id=category_id)
     if flash_sale is not None:
         query = query.filter_by(flash_sale=flash_sale)
+    else:
+        # Exclude flash_sale items by default if no filter is applied
+        query = query.filter_by(flash_sale=False)
 
+    # Fetch filtered products
     filtered_products = query.all()
 
     return render_template('products.html', products=filtered_products)
 
+@views.route('/product-section')
+def product_section():
+    # Get the maximum price from the request (default to None if not provided)
+    max_price = request.args.get('max_price', type=float)
+
+    # Fetch the maximum price from the database to set the slider's max value
+    max_product_price = db.session.query(db.func.max(Product.current_price)).scalar() or 10000
+
+    # Start with a base query excluding flash_sale items
+    query = Product.query.filter_by(flash_sale=False)
+
+    # Apply price filter if max_price is provided
+    if max_price is not None:
+        query = query.filter(Product.current_price <= max_price)
+
+    # Fetch filtered products
+    items = query.all()
+
+    return render_template('product_section.html', items=items, max_price=max_product_price)
 
 @views.route('/add-to-cart/<int:item_id>')
 @login_required
