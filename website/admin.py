@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, flash, redirect, request, send_from_directory
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from .models import Product, Order, Customer
+from .models import Product, Order, Customer, Cart
 from . import db
 from .forms import ShopItemsForm, OrderForm
+
 
 admin = Blueprint('admin', __name__)
 
@@ -26,10 +27,13 @@ def add_shop_items():
         previous_price = form.previous_price.data
         in_stock = form.in_stock.data
         flash_sale = form.flash_sale.data
+
         file = form.product_picture.data
 
         file_name = secure_filename(file.filename)
+
         file_path = f'./media/{file_name}'
+
         file.save(file_path)
 
         new_product = Product(
@@ -95,24 +99,27 @@ def update_item(item_id):
     return render_template('update_item.html', form=form, item=item_to_update)
 
 
-@admin.route('/delete-item/<int:item_id>')
+@admin.route('/delete-item/<int:item_id>', methods=['GET', 'POST'])
 @login_required
 def delete_item(item_id):
-    if current_user.id != 1:
-        return render_template('404.html'), 403
+    if current_user.id == 1:
+        try:
+            # Find the product to delete
+            item_to_delete = Product.query.get_or_404(item_id)
 
-    item_to_delete = Product.query.get_or_404(item_id)
-    try:
-        db.session.delete(item_to_delete)
-        db.session.commit()
-        flash(f'{item_to_delete.product_name} deleted successfully!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error: {e}")
-        flash('Failed to delete product. Please try again.', 'danger')
+            # Delete all related rows in the cart table
+            Cart.query.filter_by(product_link=item_id).delete()
 
-    return redirect('/shop-items')
-
+            # Delete the product
+            db.session.delete(item_to_delete)
+            db.session.commit()
+            flash('Product and related cart items deleted successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error: {e}")
+            flash(f'Failed to delete product. Error: {e}', 'danger')
+        return redirect('/shop-items')
+    return render_template('404.html'), 403
 
 @admin.route('/view-orders')
 @login_required
