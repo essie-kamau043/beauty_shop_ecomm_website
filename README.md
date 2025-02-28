@@ -1,1 +1,0 @@
-# beauty_shop_ecomm_website
