@@ -107,7 +107,7 @@ class Wishlist(db.Model):
         db.Integer, db.ForeignKey('product.id'), nullable=False)
 
     def __repr__(self):
-        return f'<Wishlist {self.id}>'
+        return f'<Wishlist {self.id}>' 
 
 
 class Review(db.Model):

@@ -27,8 +27,8 @@
                     <th scope="row">{{ item.id }}</th>
                     <td>{{ item.date_added.strftime('%Y-%m-%d') }}</td>
                     <td>{{ item.product_name }}</td>
-                    <td>${{ "%.2f" % item.previous_price }}</td>
-                    <td>${{ "%.2f" % item.current_price }}</td>
+                    <td>ksh{{ "%.2f" % item.previous_price }}</td>
+                    <td>ksh{{ "%.2f" % item.current_price }}</td>
                     <td>{{ 'Yes' if item.in_stock else 'No' }}</td>
                     <td>
                         {% if item.product_picture %}

@@ -182,8 +182,7 @@
       style="margin: 8px; background-color: rgba(82, 81, 82, 0.5)"
       id="column"
     >
-    {% for item in items %}
-
+        {% for item in items %}
       <div class="col" style="background-color: rgba(82, 81, 82, 0.5)">
         <img
           src="{{ item.product_picture }}"
@@ -214,7 +213,8 @@
           </div>
 
           <div class="col">
-            <a href="/add-to-cart/{{ item.id }}">Add</a>
+            <a href="/add-to-cart/{{ item.id }}">Add to Cart</a>
+            <a href="/add-to-wishlist/{{ item.id }}" style="margin-left: 10px;">⭐</a>
           </div>
         </div>
 
@@ -222,9 +222,7 @@
           <p>{{ item.in_stock }} Units Left</p>
         </div>
       </div>
-
-      {% endfor %}
-
+    {% endfor %}
       </div>
     </div>
   </div>
