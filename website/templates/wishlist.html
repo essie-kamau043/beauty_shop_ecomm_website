@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Wishlist{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row">
+        <h1 class="text-center mb-5" style="color: white;">Your Wishlist</h1>
+        <div class="col-sm-12">
+            <div class="card" style="border: none; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+                <div class="card-body" style="color: rgb(82, 81, 82);">
+                    <div id="wishlistItems"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function renderWishlist() {
+        const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+        const wishlistItemsDiv = document.getElementById('wishlistItems');
+        wishlistItemsDiv.innerHTML = '';
+
+        if (wishlist.length > 0) {
+            wishlist.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.innerHTML = `
+                    <div class="row" style="color: rgb(82, 81, 82); margin-bottom: 15px;">
+                        <div class="col-sm-3 text-center align-self-center">
+                            <img src="${item.productImage}" alt="${item.productName}" class="img-fluid img-thumbnail shadow-sm" style="height: 150px; width: 150px; border-radius: 10px;">
+                        </div>
+                        <div class="col-sm-9">
+                            <h3 style="margin: 0;">${item.productName}</h3>
+                            <p style="margin: 5px 0;">Price: Ksh ${item.productPrice}</p>
+                            <button class="btn btn-pink" style="background-color: #d5006d; color: white;" onclick="addToCart('${item.productName}', ${item.productPrice})">Move to Cart</button>
+                            <button class="btn btn-outline-danger" style="margin-left: 10px;" onclick="removeFromWishlist('${item.productName}')">Remove</button>
+                        </div>
+                    </div>
+                    <hr style="border-color: rgb(82, 81, 82);">
+                `;
+                wishlistItemsDiv.appendChild(itemDiv);
+            });
+        } else {
+            wishlistItemsDiv.innerHTML = '<h4>Your wishlist is empty.</h4>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', renderWishlist);
+</script>
+{% endblock %}
