@@ -178,6 +178,12 @@ a:hover {
 }
 
 /* REVIEW */
+.review {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
 .review small {
   font-weight: 600;
   text-transform: uppercase;
