@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, flash, redirect, request, jsonify
-from .models import Product, Cart, Order
+from .models import Product, Cart, Order, Wishlist
 from flask_login import login_required, current_user
 from . import db
 from intasend import APIService
@@ -213,7 +213,7 @@ def place_order():
         flash('Your cart is Empty')
         return redirect('/')
 
-
+ 
 @views.route('/orders')
 @login_required
 def order():
@@ -230,6 +230,37 @@ def search():
         return render_template('search.html', items=items, cart=Cart.query.filter_by(customer_link=current_user.id).all()
                                if current_user.is_authenticated else [])
 
+
+@views.route('/add-to-wishlist/<int:item_id>')
+@login_required
+def add_to_wishlist(item_id):
+    item_to_add = Product.query.get(item_id)
+    item_exists = Wishlist.query.filter_by(
+        product_link=item_id, customer_link=current_user.id).first()
+    
+    if item_exists:
+        flash(f'{item_to_add.product_name} is already in your wishlist')
+        return redirect(request.referrer)
+
+    new_wishlist_item = Wishlist()
+    new_wishlist_item.product_link = item_to_add.id
+    new_wishlist_item.customer_link = current_user.id
+
+    try:
+        db.session.add(new_wishlist_item)
+        db.session.commit()
+        flash(f'{item_to_add.product_name} added to wishlist')
+    except Exception as e:
+        print('Item not added to wishlist', e)
+        flash(f'{item_to_add.product_name} has not been added to wishlist')
+
+    return redirect(request.referrer)
+
+@views.route('/wishlist')
+@login_required
+def wishlist():
+    wishlist_items = Wishlist.query.filter_by(customer_link=current_user.id).all()
+    return render_template('wishlist.html', wishlist_items=wishlist_items)
 
 @views.errorhandler(404)
 def page_not_found(e):
