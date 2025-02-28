@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %} Product Listing {% endblock %}
+
+{% block body %}
+<div class="container">
+
+  <!-- Header Section -->
+  <header class="text-center">
+    <input type="text" class="form-control" placeholder="Search..." aria-label="Search" id="searchInput" oninput="searchProducts()" style="margin-top: 20px;">
+  </header>
+
+  <div class="row my-4">
+    <!-- Sidebar for Filters -->
+    <div class="col-md-3">
+      <div class="card" style="border: none; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+        <div class="card-body" style="color: rgb(82, 81, 82);">
+          <h5>Filters</h5>
+          <h6>Price Range</h6>
+          <input type="range" min="0" max="1000" value="0" class="form-range" id="priceRange" oninput="updatePriceValue(this.value); filterProducts();" style="width: 100%;">
+          <p>Ksh <span id="rangeValue">0</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Listings -->
+    <div class="col-md-9">
+      <div class="row" id="productList">
+
+        <!-- Product Items -->
+        {% for item in items %}
+        <div class="col-md-4 mb-4 product" data-price="{{ item.current_price }}" data-name="{{ item.product_name }}">
+          <div class="card text-center" data-toggle="modal" data-target="#productModal" data-price="{{ item.current_price }}" data-description="{{ item.description }}" data-image="{{ item.product_picture }}" style="border: none; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+            <img src="{{ item.product_picture }}" class="card-img-top" alt="{{ item.product_name }}" style="height: 200px; object-fit: cover; border-radius: 10px;">
+            <div class="card-body">
+              <strong>Ksh {{ item.current_price }}</strong>
+              <button class="btn btn-pink mt-2" onclick="addToCart('{{ item.product_name }}', {{ item.current_price }})" style="background-color: #d5006d; color: white;">Add to Cart</button>
+              <button class="btn btn-outline-danger mt-2" onclick="addToWishlist('{{ item.product_name }}', {{ item.current_price }}, '{{ item.product_picture }}')">Add to Wishlist</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productModalLabel">Product Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex">
+        <img src="" id="modalProductImage" alt="" class="img-fluid me-4" style="width: 150px; height: auto;">
+        <div>
+          <h3 id="modalProductName"></h3>
+          <p id="modalProductPrice"></p>
+          <p id="modalProductDescription"></p>
+          <button class="btn btn-pink" id="addToCartModalBtn" onclick="addToCart(modalProductName.innerText, parseFloat(modalProductPrice.innerText.replace('Ksh ', '')))" style="background-color: #d5006d; color: white;">Add to Cart</button>
+          <button class="btn btn-outline-danger" id="wishlistModalBtn" onclick="addToWishlist(modalProductName.innerText, parseFloat(modalProductPrice.innerText.replace('Ksh ', '')), modalProductImage.src)">Add to Wishlist</button>
+
+          <div class="review-section mt-4">
+            <h4>Reviews</h4>
+            <div id="reviews">
+              <p>No reviews yet.</p>
+            </div>
+            <h5>Rate this product:</h5>
+            <div id="ratingStars">
+              <span class="star" onclick="submitRating(1)" style="color: #ffcc00; cursor: pointer;">&#9733;</span>
+              <span class="star" onclick="submitRating(2)" style="color: #ffcc00; cursor: pointer;">&#9733;</span>
+              <span class="star" onclick="submitRating(3)" style="color: #ffcc00; cursor: pointer;">&#9733;</span>
+              <span class="star" onclick="submitRating(4)" style="color: #ffcc00; cursor: pointer;">&#9733;</span>
+              <span class="star" onclick="submitRating(5)" style="color: #ffcc00; cursor: pointer;">&#9733;</span>
+            </div>
+            <h5>Add Your Review:</h5>
+            <textarea id="reviewInput" class="form-control" rows="3" placeholder="Write your review..." style="border-radius: 5px;"></textarea>
+            <button class="btn btn-pink mt-2" onclick="submitReview()" style="background-color: #d5006d; color: white;">Submit Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Filter and Search Functions
+function updatePriceValue(value) {
+    document.getElementById('rangeValue').textContent = value;
+    filterProducts();
+}
+
+function filterProducts() {
+    const rangeValue = parseInt(document.getElementById('priceRange').value);
+    document.querySelectorAll('.product').forEach(product => {
+        const productPrice = parseInt(product.getAttribute('data-price'));
+        if (productPrice <= rangeValue) {
+            product.classList.remove('hidden');
+        } else {
+            product.classList.add('hidden');
+        }
+    });
+}
+
+function searchProducts() {
+    const searchValue = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.product').forEach(product => {
+        const productName = product.getAttribute('data-name').toLowerCase();
+        if (productName.includes(searchValue)) {
+            product.classList.remove('hidden');
+        } else {
+            product.classList.add('hidden');
+        }
+    });
+}
+
+// Modal Functionality
+function openModal(element) {
+    const productName = element.getAttribute('data-name');
+    const productPrice = element.getAttribute('data-price');
+    const productDescription = element.getAttribute('data-description');
+    const productImage = element.getAttribute('data-image');
+
+    document.getElementById('modalProductName').textContent = productName;
+    document.getElementById('modalProductPrice').textContent = `Ksh ${productPrice}`;
+    document.getElementById('modalProductDescription').textContent = productDescription;
+    document.getElementById('modalProductImage').src = productImage;
+}
+
+// Attach the openModal function to the product card click event
+document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', function() {
+        openModal(this);
+    });
+});
+
+// Add to Cart function
+function addToCart(productName, productPrice) {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingProduct = cart.find(item => item.productName === productName);
+
+    if (existingProduct) {
+        existingProduct.quantity += 1; // Increase quantity if already in cart
+    } else {
+        cart.push({ productName, productPrice, quantity: 1 }); // Add new product to cart
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    alert(`${productName} has been added to your cart!`);
+}
+
+// Add to Wishlist function
+function addToWishlist(productName, productPrice, productImage) {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const existingProduct = wishlist.find(item => item.productName === productName);
+
+    if (!existingProduct) {
+        wishlist.push({ productName, productPrice, productImage }); // Add new product to wishlist
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        alert(`${productName} has been added to your wishlist!`);
+    } else {
+        alert(`${productName} is already in your wishlist.`);
+    }
+}
+
+// Rating functionality
+function submitRating(rating) {
+    const reviewsDiv = document.getElementById('reviews');
+    const newReview = document.createElement('p');
+    newReview.textContent = `Rated: ${rating} Star(s)`;
+    reviewsDiv.appendChild(newReview);
+}
+
+// Review submission functionality
+function submitReview() {
+    const reviewText = document.getElementById('reviewInput').value.trim();
+    if (reviewText) {
+        const reviewsDiv = document.getElementById('reviews');
+        const newReview = document.createElement('p');
+        newReview.textContent = reviewText;
+        reviewsDiv.appendChild(newReview);
+        document.getElementById('reviewInput').value = ''; // Clear input field
+    } else {
+        alert('Please enter a review before submitting.');
+    }
+}
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}

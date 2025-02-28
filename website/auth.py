@@ -109,3 +109,8 @@ def change_password(customer_id):
 @login_required
 def wishlist():
     return render_template('wishlist.html')
+
+@app.route('/products')
+@login_required
+def products():
+    return render_template('products.html', items=your_product_data)
