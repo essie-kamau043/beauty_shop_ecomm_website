@@ -18,6 +18,7 @@
                     <th scope="col">In Stock</th>
                     <th scope="col">Product Picture</th>
                     <th scope="col">Flash Sale</th>
+                    <th scope="col">Category</th>
                     <th scope="col">Action</th>
                 </tr>
             </thead>
@@ -38,6 +39,14 @@
                         {% endif %}
                     </td>
                     <td>{{ 'Yes' if item.flash_sale else 'No' }}</td>
+                    <td>
+                        <select name="category" class="form-control" title="Category">
+                            <option value="mascara" {% if item.category = 'mascara' %} selected {% endif %}>Mascara</option>
+                            <option value="foundation" {% if item.category = 'foundation' %} selected {% endif %}>Foundation</option>
+                            <option value="lipstick" {% if item.category = 'lipstick' %} selected {% endif %}>Lipstick</option>
+                            <option value="makeup_powder" {% if item.category = 'makeup_powder' %} selected {% endif %}>Makeup Powder</option>
+                        </select>
+                    </td>
                     <td>
                         <a href="/update-item/{{ item.id }}" class="btn" style="background-color: #000000; color: #ffffff; margin-bottom: 5px;">Update</a>
                         <br>

@@ -14,6 +14,7 @@
             <th scope="col">In Stock</th>
             <th scope="col">Picture</th>
             <th scope="col">Flash Sale</th>
+            <th scope="col">Category</th>
             <th scope="col">Add</th>
 
         </tr>
@@ -30,6 +31,14 @@
                 <td>{{ form.in_stock }}</td>
                 <td>{{ form.product_picture() }}</td>
                 <td>{{ form.flash_sale }}</td>
+                <td>
+                    <select name="category" class="form-control" title="Category">
+                        <option value="mascara">Mascara</option>
+                        <option value="foundation">Foundation</option>
+                        <option value="lipstick">Lipstick</option>
+                        <option value="makeup_powder">Makeup Powder</option>
+                    </select>
+                </td>
                 <td>{{ form.add_product() }}</td>
             </form>
         </tr>
