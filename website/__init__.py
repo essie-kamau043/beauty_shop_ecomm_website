@@ -21,6 +21,7 @@ def create_app():
     Factory function to create and configure the Flask application.
     """
     app = Flask(__name__)
+    app.config.from_object
 
     # Load configuration
     app.config.from_object('website.config.Config')
@@ -30,6 +31,8 @@ def create_app():
     migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'  # Set the login view for Flask-Login
+    
+
 
     # Error handler for 404
     @app.errorhandler(404)
