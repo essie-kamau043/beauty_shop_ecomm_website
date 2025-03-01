@@ -13,12 +13,10 @@
     />
     <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
     <title>Beauty Shop dashboard</title>
-    <!--     Fonts and icons     -->
     <link
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
       rel="stylesheet"
     />
-    <!-- Nucleo Icons -->
     <link
       href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-icons.css"
       rel="stylesheet"
@@ -27,7 +25,6 @@
       href="https://demos.creative-tim.com/argon-dashboard-pro/assets/css/nucleo-svg.css"
       rel="stylesheet"
     />
-    <!-- Font Awesome Icons -->
     <script
       src="https://kit.fontawesome.com/42d5adcbca.js"
       crossorigin="anonymous"
@@ -38,6 +35,34 @@
       href="../static/css/argon-dashboard.css"
       rel="stylesheet"
     />
+    <style>
+      /* Add margin-top to the table container */
+      .table-container {
+        margin-top: 100px; /* Adjust this value as needed */
+        overflow-x: auto; /* Add horizontal scroll if the table is too wide */
+      }
+
+      /* Ensure the table is responsive */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f8f9fa;
+        color: #333; /* Dark text for better readability */
+      }
+
+      tr:hover {
+        background-color: #f1f1f1; /* Highlight rows on hover */
+      }
+    </style>
   </head>
 
   <body class="bg-gradient-primary">
@@ -100,20 +125,20 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link me-2" href="#">
-                      <i class="fa fa-user opacity-6 text-dark me-1"></i>
+                    <a class="nav-link me-2" href="/categories">
+                      <i class="fas fa-key opacity-6 text-dark me-1"></i>
                       Categories
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link me-2" href="#">
-                      <i class="fa fa-user opacity-6 text-dark me-1"></i>
+                    <a class="nav-link me-2" href="/inventory">
+                      <i class="fas fa-key opacity-6 text-dark me-1"></i>
                       Inventory
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link me-2" href="#">
-                      <i class="fa fa-user opacity-6 text-dark me-1"></i>
+                    <a class="nav-link me-2" href="/payments">
+                      <i class="fas fa-key opacity-6 text-dark me-1"></i>
                       Payments
                     </a>
                   </li>
@@ -159,7 +184,12 @@
                       aria-label="Close"
                     ></button>
                   </div>
-                  {% endfor %} {% block body %} {% endblock %}
+                  {% endfor %} 
+
+                  <!-- Add a container for the table -->
+                  <div class="table-container">
+                    {% block body %} {% endblock %}
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,8 +1,9 @@
+from sqlalchemy import Enum
 from . import db
 from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from website import db
 
 class Customer(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -107,7 +108,7 @@ class Wishlist(db.Model):
         db.Integer, db.ForeignKey('product.id'), nullable=False)
 
     def __repr__(self):
-        return f'<Wishlist {self.id}>' 
+        return f'<Wishlist {self.id}>'
 
 
 class Review(db.Model):
@@ -124,3 +125,34 @@ class Review(db.Model):
 
     def __repr__(self):
         return f'<Review {self.id}>'
+
+
+class Inventory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.String(100), nullable=False)
+    category_id = db.Column(db.Integer, nullable=False)
+    stock = db.Column(db.Integer, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=False,
+                           default=datetime.utcnow)
+
+
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+    customer_link = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+    product_link = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    transaction_id = db.Column(db.String(100), nullable=False)
+    payment_method = db.Column(Enum(
+        'credit_card', 'paypal', 'bank_transfer', name='payment_method_enum'), nullable=False)
+    status = db.Column(Enum('pending', 'completed', 'failed',
+                       name='payment_status_enum'), nullable=False, default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    order = db.relationship('Order', backref='payments')
+    customer = db.relationship('Customer', backref='payments')
+    product = db.relationship('Product', backref='payments')
+
+    def __repr__(self):
+        return f'<Payment {self.id}>'

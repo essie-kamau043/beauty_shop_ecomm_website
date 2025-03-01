@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, flash, redirect, request, send_from_directory
+from flask import Blueprint, render_template, flash, redirect, request, send_from_directory, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from .models import Product, Order, Customer, Cart
+from .models import Product, Order, Customer, Cart, Inventory, Category, Payment
 from . import db
+from datetime import datetime
 from .forms import ShopItemsForm, OrderForm
 
 
@@ -171,3 +172,78 @@ def admin_page():
         return render_template('404.html'), 403
 
     return render_template('admin.html')
+
+@admin.route('/inventory')
+def inventory():
+    inventory = Product.query.with_entities(
+        Product.id, Product.product_name, Product.category_id, Product.in_stock, Product.date_added
+    ).all()
+    return render_template('inventory.html', inventory=inventory)
+
+
+@admin.route('/edit-inventory/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_inventory(id):
+    if current_user.id != 1: 
+        return render_template('404.html'), 403
+
+    item = Inventory.query.get_or_404(id) 
+
+    if request.method == 'POST':
+        item.product_name = request.form['product_name']
+        item.category_id = request.form['category_id']
+        item.stock = int(request.form['stock'])
+        item.updated_at = datetime.utcnow() 
+
+        try:
+            db.session.commit()
+            flash('Inventory item updated successfully!', 'success')
+            return redirect(url_for('inventory'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Failed to update inventory item. Please try again.', 'danger')
+            print(f"Error: {e}")
+
+    return render_template('edit_inventory.html', item=item)
+
+
+@admin.route('/categories')
+@login_required
+def categories():
+    if current_user.id != 1:  
+        return render_template('404.html'), 403
+
+    search_query = request.args.get('search', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  
+
+    query = Category.query
+    if search_query:
+        query = query.filter(Category.name.ilike(f'%{search_query}%'))
+
+    categories = query.order_by(Category.created_at.desc()).paginate(
+        page=page, per_page=per_page)
+
+    return render_template('categories.html', categories=categories, search_query=search_query)
+
+
+@admin.route('/payments')
+@login_required
+def payments():
+    if current_user.id != 1:  
+        return render_template('404.html'), 403
+
+    search_query = request.args.get('search', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  
+
+
+    query = Payment.query
+    if search_query:
+        query = query.filter(Payment.transaction_id.ilike(f'%{search_query}%'))
+
+
+    payments = query.order_by(Payment.created_at.desc()).paginate(
+        page=page, per_page=per_page)
+
+    return render_template('payments.html', payments=payments, search_query=search_query)
