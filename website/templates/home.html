@@ -189,7 +189,7 @@
           alt=""
           style="
             height: 200px;
-            width: 250px;
+            width: 200px;
             border-radius: 10px;
             margin-top: 10px;
           "
@@ -213,8 +213,31 @@
           </div>
 
           <div class="col">
-            <a href="/add-to-cart/{{ item.id }}">Add to Cart</a>
-            <a href="/add-to-wishlist/{{ item.id }}" style="margin-left: 10px;">⭐</a>
+            <a
+              href="/add-to-cart/{{ item.id }}"
+              style="
+                background-color: #FF2D81;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                text-decoration: none;
+              "
+            >
+            <i class="bi bi-cart-fill"></i>
+            </a>
+            <a
+              href="/add-to-wishlist/{{ item.id }}"
+              style="
+                margin-left: 10px;
+                background-color: #FF2D81;
+                color: black;
+                padding: 5px 10px;
+                border-radius: 5px;
+                text-decoration: none;
+              "
+            >
+              ⭐
+            </a>
           </div>
         </div>
 
@@ -311,15 +334,15 @@
                               <i class="ri-star-fill"></i>
                               <i class="ri-star-fill"></i>
                           </div>
-                          <p>The expertise and dedication of Itothya General Agencies Ltd have been instrumental in streamlining our 
-                              debt recovery process. Their professional team understands the importance of maintaining client relationships, 
+                          <p>Their expertise and dedication have been instrumental in streamlining our 
+                              small beauty shop. Their professional team understands the importance of maintaining client relationships, 
                               which has been crucial for us.</p>
                       </div>
                       <div class="review-person mt-4 d-flex align-items-center">
-                          <img class="rounded-circle" src="./assets/images/images (1).jpeg" alt="">
+                          <img class="rounded-circle" src="../static/images/pexels-chidimma-peace-162266897-11377297.jpg" alt="">
                           <div class="ms-3">
-                              <h5>Standard Group</h5>
-                              <small>Multimedia House</small>
+                              <h5>Oragen</h5>
+                              <small>Item</small>
                           </div>
                       </div>
                   </div>

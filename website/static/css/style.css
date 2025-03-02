@@ -179,7 +179,7 @@ a:hover {
 
 /* REVIEW */
 .review {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(49, 49, 49, 0.5);
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
@@ -192,6 +192,7 @@ a:hover {
 
 .review-head {
   position: relative;
+  background-color: rgba(82, 81, 82);
 }
 
 .review-head::after {
@@ -200,7 +201,7 @@ a:hover {
   height: 28px;
   position: absolute;
   bottom: -14px;
-  background-color: white;
+  background-color: rgba(82, 81, 82);
   transform: rotate(45deg);
 }
 

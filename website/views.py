@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, redirect, request, jsonify
+from flask import Blueprint, render_template, flash, redirect, request, jsonify, url_for
 from .models import Product, Cart, Order, Wishlist
 from flask_login import login_required, current_user
 from . import db
@@ -7,9 +7,9 @@ from intasend import APIService
 
 views = Blueprint('views', __name__)
 
-API_PUBLISHABLE_KEY = 'ISPubKey_live_1577ccf6-881c-4711-a6a5-f0699797b0e5'
+API_PUBLISHABLE_KEY = 'ISPubKey_test_6fdcc500-15b3-476a-b5fc-9bc4f4523390'
 
-API_TOKEN = 'ISSecretKey_live_82f96a3d-ae45-4c7d-b162-c3edb20f87c0'
+API_TOKEN = 'ISSecretKey_test_a99a507f-e552-497d-a4fb-5b6e13f4bf9d'
 
 
 @views.route('/')
@@ -113,7 +113,7 @@ def show_cart():
     for item in cart:
         amount += item.product.current_price * item.quantity
 
-    return render_template('cart.html', cart=cart, amount=amount, total=amount+200)
+    return render_template('cart.html', cart=cart, amount=amount, total=amount)
 
 
 @views.route('/pluscart')
@@ -190,61 +190,117 @@ def remove_cart():
 
         return jsonify(data)
 
+@views.route('/payment-successful')
+def payment_successful():
+    # Get the payment ID or checkout ID from the query parameters
+    payment_id = request.args.get('payment_id') or request.args.get('checkout_id')
 
-@views.route('/place-order')
+    if payment_id:
+        # Find the order in the database using the payment_id
+        order = Order.query.filter_by(payment_id=payment_id).first()
+
+        if order:
+            # Render the payment_successful page with the order details
+            return render_template('payment_successful.html', order=order)
+
+    # If no payment ID or order is found, redirect to home
+    flash('Invalid payment details.')
+    return redirect('/')
+
+@views.route('/confirm-payment', methods=['POST'])
+@login_required
+def confirm_payment():
+    # Get the payment ID from the form
+    payment_id = request.form.get('payment_id')
+
+    if payment_id:
+        # Find the order in the database using the payment_id
+        order = Order.query.filter_by(payment_id=payment_id).first()
+
+        if order:
+            # Update the order status to 'paid'
+            order.status = 'paid'
+            db.session.commit()
+            flash('Payment confirmed! Thank you for your purchase.')
+        else:
+            flash('Order not found.')
+    else:
+        flash('Invalid payment details.')
+
+    # Redirect to the orders page
+    return redirect(url_for('views.orders'))
+
+@views.route('/place-order', methods=['POST'])
 @login_required
 def place_order():
+    # Get the phone number from the form
+    phone_number = request.form.get('phone_number')
+
+    # Validate the phone number
+    if not phone_number or not phone_number.startswith('254') or len(phone_number) != 12:
+        flash('Invalid phone number. Please enter a valid Kenyan phone number (e.g., 2547XXXXXXXX).')
+        return redirect('/cart')
+
     customer_cart = Cart.query.filter_by(customer_link=current_user.id)
     if customer_cart:
         try:
+            # Calculate the total amount
             total = 0
             for item in customer_cart:
                 total += item.product.current_price * item.quantity
 
-            service = APIService(
-                token=API_TOKEN, publishable_key=API_PUBLISHABLE_KEY, test=True)
-            create_order_response = service.collect.mpesa_stk_push(phone_number='YOUR_NUMBER ', email=current_user.email,
-                                                                   amount=total + 200, narrative='Purchase of goods')
+            # Initialize IntaSend service
+            service = APIService(token=API_TOKEN, publishable_key=API_PUBLISHABLE_KEY, test=True)
 
+            # Generate a checkout link
+            response = service.collect.checkout(
+                phone_number=phone_number,  # Use the phone number from the form
+                email=current_user.email,  # Customer's email
+                amount=10,                  # Total amount (set to 1 for testing)
+                currency='KES',            # Currency
+                comment='Purchase of goods',  # Optional comment
+                redirect_url=url_for('views.payment_successful', checkout_id='temp_checkout_id', _external=True),  # Use a temporary checkout_id for debugging
+                api_ref=f'order_{current_user.id}',  # Optional reference for tracking
+            )
+
+            # Get the payment URL
+            payment_url = response.get('url')
+            print("Redirect URL:", payment_url)  # Debugging: Print the redirect URL
+
+            # Create orders in the database
             for item in customer_cart:
-                new_order = Order()
-                new_order.quantity = item.quantity
-                new_order.price = item.product.current_price
-                new_order.status = create_order_response['invoice']['state'].capitalize(
+                new_order = Order(
+                    quantity=item.quantity,
+                    price=item.product.current_price,
+                    status='pending',  # Default status
+                    payment_id=response.get('id'),  # Use the actual payment_id from IntaSend
+                    phone_number=phone_number,  # Store the phone number
+                    customer_link=current_user.id,
+                    product_link=item.product_link
                 )
-                new_order.payment_id = create_order_response['id']
-
-                new_order.product_link = item.product_link
-                new_order.customer_link = item.customer_link
-
                 db.session.add(new_order)
 
+                # Update product stock
                 product = Product.query.get(item.product_link)
-
                 product.in_stock -= item.quantity
 
+                # Remove item from cart
                 db.session.delete(item)
 
-                db.session.commit()
+            # Commit changes to the database
+            db.session.commit()
 
-            flash('Order Placed Successfully')
+            # Redirect the customer to the payment URL
+            return redirect(payment_url)
 
-            return redirect('/orders')
         except Exception as e:
-            print(e)
-            flash('Order not placed')
-            return redirect('/')
+            print('Error generating payment link:', str(e))  # Log the full error message
+            db.session.rollback()  # Rollback in case of error
+            flash('Failed to generate payment link. Please try again.')
+            return redirect('/cart')
     else:
-        flash('Your cart is Empty')
-        return redirect('/')
-
- 
-@views.route('/orders')
-@login_required
-def order():
-    orders = Order.query.filter_by(customer_link=current_user.id).all()
-    return render_template('orders.html', orders=orders)
-
+        flash('Your cart is empty.')
+        return redirect('/cart')
 
 @views.route('/search', methods=['GET', 'POST'])
 def search():
@@ -255,6 +311,13 @@ def search():
         return render_template('search.html', items=items, cart=Cart.query.filter_by(customer_link=current_user.id).all()
                                if current_user.is_authenticated else [])
 
+
+@views.route('/orders')
+@login_required
+def orders():
+    # Fetch orders for the current user
+    orders = Order.query.filter_by(customer_link=current_user.id).all()
+    return render_template('orders.html', orders=orders)
 
 @views.route('/add-to-wishlist/<int:item_id>')
 @login_required

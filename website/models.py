@@ -88,6 +88,7 @@ class Order(db.Model):
     price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(100), nullable=False, default='pending')
     payment_id = db.Column(db.String(1000))
+    phone_number = db.Column(db.String(15), nullable=False)  # New column
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Foreign Keys
@@ -98,7 +99,6 @@ class Order(db.Model):
 
     def __repr__(self):
         return f'<Order {self.id}>'
-
 
 class Wishlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
