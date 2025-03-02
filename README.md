@@ -18,12 +18,12 @@
      flask db upgrade
      ```
 
-5. **Run the Application**:
+5. **Run the Application with either of the 2 commands**:
    ```bash
    flask run
    ```
    ```or use
-   python3 main.py
+   python3 main.py  # Better option as you can refresh to view your changes
    ```
    - The app will be available at `http://127.0.0.1:5000/`.
 
