@@ -200,6 +200,10 @@ def payment_successful():
         order = Order.query.filter_by(payment_id=payment_id).first()
 
         if order:
+            # Update the order status to 'paid'
+            order.status = 'paid'
+            db.session.commit()
+
             # Render the payment_successful page with the order details
             return render_template('payment_successful.html', order=order)
 
@@ -241,13 +245,21 @@ def place_order():
         flash('Invalid phone number. Please enter a valid Kenyan phone number (e.g., 2547XXXXXXXX).')
         return redirect('/cart')
 
-    customer_cart = Cart.query.filter_by(customer_link=current_user.id)
+    customer_cart = Cart.query.filter_by(customer_link=current_user.id).all()
     if customer_cart:
         try:
             # Calculate the total amount
             total = 0
+            items = []  # List to store product details
+
             for item in customer_cart:
                 total += item.product.current_price * item.quantity
+                items.append({
+                    'product_id': item.product_link,
+                    'product_name': item.product.product_name,  # Include product name
+                    'quantity': item.quantity,
+                    'price': item.product.current_price
+                })
 
             # Initialize IntaSend service
             service = APIService(token=API_TOKEN, publishable_key=API_PUBLISHABLE_KEY, test=True)
@@ -267,24 +279,20 @@ def place_order():
             payment_url = response.get('url')
             print("Redirect URL:", payment_url)  # Debugging: Print the redirect URL
 
-            # Create orders in the database
-            for item in customer_cart:
-                new_order = Order(
-                    quantity=item.quantity,
-                    price=item.product.current_price,
-                    status='pending',  # Default status
-                    payment_id=response.get('id'),  # Use the actual payment_id from IntaSend
-                    phone_number=phone_number,  # Store the phone number
-                    customer_link=current_user.id,
-                    product_link=item.product_link
-                )
-                db.session.add(new_order)
+            # Create a single order in the database
+            new_order = Order(
+                items=items,  # Store all items as JSON
+                status='pending',  # Default status
+                payment_id=response.get('id'),  # Use the actual payment_id from IntaSend
+                phone_number=phone_number,  # Store the phone number
+                customer_link=current_user.id
+            )
+            db.session.add(new_order)
 
-                # Update product stock
+            # Update product stock and remove items from cart
+            for item in customer_cart:
                 product = Product.query.get(item.product_link)
                 product.in_stock -= item.quantity
-
-                # Remove item from cart
                 db.session.delete(item)
 
             # Commit changes to the database

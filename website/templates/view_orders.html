@@ -9,9 +9,7 @@
     <tr>
       <th>Order ID</th>
       <th>Customer</th>
-      <th>Product</th>
-      <th>Quantity</th>
-      <th>Price</th>
+      <th>Products</th>
       <th>Status</th>
       <th>Date</th>
     </tr>
@@ -20,16 +18,22 @@
     {% for order in orders %}
     <tr>
       <td>{{ order.id }}</td>
-      <td>{{ order.customer.username }}</td>  
-      <td>{{ order.product.product_name }}</td> 
-      <td>{{ order.quantity }}</td>
-      <td>${{ order.price }}</td>
+      <td>{{ order.customer.username }}</td>  <!-- Access customer via the relationship -->
+      <td>
+        <ul>
+          {% for item in order.items %}
+          <li>
+            {{ item.product_name }} - Quantity: {{ item.quantity }} - Price: ${{ item.price }}
+          </li>
+          {% endfor %}
+        </ul>
+      </td>
       <td>{{ order.status }}</td>
-      <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>  
+      <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
     </tr>
     {% else %}
     <tr>
-      <td colspan="7" class="text-center">No orders found.</td>
+      <td colspan="5" class="text-center">No orders found.</td>
     </tr>
     {% endfor %}
   </tbody>
