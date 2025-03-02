@@ -25,6 +25,8 @@ body {
 .navbar {
   background-color: none;
   position: sticky;
+  padding-left: 80px;
+  padding-right: 80px;
   top: 0; /* Stick to the top of the page */
   z-index: 1000; /* Ensure the navbar stays above other content */
 }

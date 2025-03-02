@@ -1,28 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %} My Orders {% endblock %}
+{% block title %} Orders {% endblock %}
 
 {% block body %}
-<div class="container" style="background-color: rgba(245, 245, 245, 0.5)">
-    <h2>My Orders</h2>
+<div class="container"  style="
+background-color: rgba(82, 81, 82, 0.5);
+">
+    <h1>Your Orders</h1>
     <table class="table">
         <thead>
-            <tr>
+            <tr style="
+            background-color: rgba(255, 255, 255, 0.5);
+            ">
                 <th>Order ID</th>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
                 <th>Status</th>
+                <th>Payment ID</th>
+                <th>Phone Number</th>
+                <th>Products</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody style="
+        background-color: rgba(255, 255, 255, 0.5);
+        ">
             {% for order in orders %}
             <tr>
-                <td>{{ order.id }}</td>
-                <td>{{ order.product.product_name }}</td>
-                <td>{{ order.quantity }}</td>
-                <td>Ksh {{ "%.2f" % order.price }}</td>
+                <td >{{ order.id }}</td>
                 <td>{{ order.status }}</td>
+                <td>{{ order.payment_id }}</td>
+                <td>{{ order.phone_number }}</td>
+                <td>
+                    <ul>
+                        {% for item in order.items %}
+                        <li>
+                            {{ item.product_name }} - Quantity: {{ item.quantity }} - Price: KES {{ item.price }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

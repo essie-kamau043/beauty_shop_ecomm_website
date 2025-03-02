@@ -1,6 +1,7 @@
 from sqlalchemy import Enum
 from . import db
 from flask_login import UserMixin
+from sqlalchemy import JSON
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from website import db
@@ -14,7 +15,6 @@ class Customer(db.Model, UserMixin):
 
     # Relationships
     cart_items = db.relationship('Cart', backref='customer', lazy=True)
-    orders = db.relationship('Order', backref='customer', lazy=True)
     reviews = db.relationship('Review', backref='customer', lazy=True)
     wishlist_items = db.relationship('Wishlist', backref='customer', lazy=True)
 
@@ -59,7 +59,6 @@ class Product(db.Model):
 
     # Relationships
     carts = db.relationship('Cart', backref='product', lazy=True)
-    orders = db.relationship('Order', backref='product', lazy=True)
     reviews = db.relationship('Review', backref='product', lazy=True)
     wishlist_items = db.relationship('Wishlist', backref='product', lazy=True)
     category = db.relationship('Category', back_populates='products')
@@ -84,18 +83,15 @@ class Cart(db.Model):
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    quantity = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)
+    items = db.Column(db.JSON, nullable=False)  # Stores product details
     status = db.Column(db.String(100), nullable=False, default='pending')
     payment_id = db.Column(db.String(1000))
-    phone_number = db.Column(db.String(15), nullable=False)  # New column
+    phone_number = db.Column(db.String(15), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    customer_link = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
-    # Foreign Keys
-    customer_link = db.Column(
-        db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    product_link = db.Column(
-        db.Integer, db.ForeignKey('product.id'), nullable=False)
+    # Define a relationship to the Customer model
+    customer = db.relationship('Customer', backref='orders')
 
     def __repr__(self):
         return f'<Order {self.id}>'
@@ -140,19 +136,17 @@ class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     customer_link = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    product_link = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     transaction_id = db.Column(db.String(100), nullable=False)
     payment_method = db.Column(Enum(
         'credit_card', 'paypal', 'bank_transfer', name='payment_method_enum'), nullable=False)
     status = db.Column(Enum('pending', 'completed', 'failed',
-                       name='payment_status_enum'), nullable=False, default='pending')
+                           name='payment_status_enum'), nullable=False, default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     order = db.relationship('Order', backref='payments')
     customer = db.relationship('Customer', backref='payments')
-    product = db.relationship('Product', backref='payments')
 
     def __repr__(self):
         return f'<Payment {self.id}>'
