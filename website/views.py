@@ -194,6 +194,7 @@ def remove_cart():
 def payment_successful():
     # Get the payment ID or checkout ID from the query parameters
     payment_id = request.args.get('payment_id') or request.args.get('checkout_id')
+    print("Payment ID from IntaSend:", payment_id)  # Debugging: Check if this is received
 
     if payment_id:
         # Find the order in the database using the payment_id
@@ -237,7 +238,6 @@ def confirm_payment():
 @views.route('/place-order', methods=['POST'])
 @login_required
 def place_order():
-    # Get the phone number from the form
     phone_number = request.form.get('phone_number')
 
     # Validate the phone number
@@ -256,7 +256,7 @@ def place_order():
                 total += item.product.current_price * item.quantity
                 items.append({
                     'product_id': item.product_link,
-                    'product_name': item.product.product_name,  # Include product name
+                    'product_name': item.product.product_name,
                     'quantity': item.quantity,
                     'price': item.product.current_price
                 })
@@ -265,26 +265,26 @@ def place_order():
             service = APIService(token=API_TOKEN, publishable_key=API_PUBLISHABLE_KEY, test=True)
 
             # Generate a checkout link
-            response = service.collect.checkout(
-                phone_number=phone_number,  # Use the phone number from the form
-                email=current_user.email,  # Customer's email
-                amount=10,                  # Total amount (set to 1 for testing)
-                currency='KES',            # Currency
-                comment='Purchase of goods',  # Optional comment
-                redirect_url=url_for('views.payment_successful', checkout_id='temp_checkout_id', _external=True),  # Use a temporary checkout_id for debugging
-                api_ref=f'order_{current_user.id}',  # Optional reference for tracking
-            )
+            redirect_url = url_for('views.payment_successful', _external=True)
+            print("Redirect URL:", redirect_url)  # Debugging: Print the redirect URL
 
-            # Get the payment URL
-            payment_url = response.get('url')
-            print("Redirect URL:", payment_url)  # Debugging: Print the redirect URL
+            response = service.collect.checkout(
+                phone_number=phone_number,
+                email=current_user.email,
+                amount=15,  # Testing amount
+                currency='KES',
+                comment='Purchase of goods',
+                redirect_url=redirect_url,
+                api_ref=f'order_{current_user.id}',
+            )
+            print("IntaSend Response:", response)  # Debugging: Print the full response
 
             # Create a single order in the database
             new_order = Order(
-                items=items,  # Store all items as JSON
-                status='pending',  # Default status
-                payment_id=response.get('id'),  # Use the actual payment_id from IntaSend
-                phone_number=phone_number,  # Store the phone number
+                items=items,
+                status='pending',
+                payment_id=response.get('id'),
+                phone_number=phone_number,
                 customer_link=current_user.id
             )
             db.session.add(new_order)
@@ -299,7 +299,7 @@ def place_order():
             db.session.commit()
 
             # Redirect the customer to the payment URL
-            return redirect(payment_url)
+            return redirect(response.get('url'))
 
         except Exception as e:
             print('Error generating payment link:', str(e))  # Log the full error message
