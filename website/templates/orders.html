@@ -4,13 +4,14 @@
 
 {% block body %}
 <div class="container"  style="
-background-color: rgba(82, 81, 82, 0.5);
+background-color: rgba(250, 3, 151, 0.5);
 ">
-    <h1>Your Orders</h1>
+<h1 class="text-center">Your Orders</h1>
+
     <table class="table">
         <thead>
             <tr style="
-            background-color: rgba(255, 255, 255, 0.5);
+            background-color: rgb(245, 240, 240);
             ">
                 <th>Order ID</th>
                 <th>Status</th>
@@ -20,7 +21,7 @@ background-color: rgba(82, 81, 82, 0.5);
             </tr>
         </thead>
         <tbody style="
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: rgba(245, 243, 243, 0.429);
         ">
             {% for order in orders %}
             <tr>
