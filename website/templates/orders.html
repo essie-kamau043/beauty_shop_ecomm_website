@@ -3,44 +3,41 @@
 {% block title %} Orders {% endblock %}
 
 {% block body %}
-<div class="container"  style="
-background-color: rgba(250, 3, 151, 0.5);
-">
-<h1 class="text-center">Your Orders</h1>
+<div class="container mt-5" style="background-color: #ffffff; color: #000; padding: 20px; border-radius: 10px;">
+    <h1 class="text-center">Orders</h1>
+    <h4 class="text-center text-muted">Recent Orders</h4>
 
-    <table class="table">
-        <thead>
-            <tr style="
-            background-color: rgb(245, 240, 240);
-            ">
-                <th>Order ID</th>
-                <th>Status</th>
-                <th>Payment ID</th>
-                <th>Phone Number</th>
-                <th>Products</th>
-            </tr>
-        </thead>
-        <tbody style="
-        background-color: rgba(245, 243, 243, 0.429);
-        ">
-            {% for order in orders %}
-            <tr>
-                <td >{{ order.id }}</td>
-                <td>{{ order.status }}</td>
-                <td>{{ order.payment_id }}</td>
-                <td>{{ order.phone_number }}</td>
-                <td>
-                    <ul>
-                        {% for item in order.items %}
-                        <li>
-                            {{ item.product_name }} - Quantity: {{ item.quantity }} - Price: KES {{ item.price }}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card p-4 shadow-lg" style="background-color: #f9f9f9; border-radius: 10px; color: #000;">
+        {% for order in orders %}
+        <div class="accordion" id="ordersAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ order.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#collapse{{ order.id }}" aria-expanded="false" 
+                        aria-controls="collapse{{ order.id }}" 
+                        style="background-color: #f0f0f0; font-weight: bold; color: #000;">
+                        Order {{ order.id }} - Status: {{ order.status }}
+                    </button>
+                </h2>
+                <div id="collapse{{ order.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ order.id }}" 
+                    data-bs-parent="#ordersAccordion">
+                    <div class="accordion-body" style="background-color: #ffffff; color: #000;">
+                        <p><strong>Payment ID:</strong> {{ order.payment_id }}</p>
+                        <p><strong>Phone Number:</strong> {{ order.phone_number }}</p>
+                        <p><strong>Products:</strong></p>
+                        <ul>
+                            {% for item in order.items %}
+                            <li>
+                                {{ item.product_name }} - Quantity: {{ item.quantity }} - Price: KES {{ item.price }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+
 {% endblock %}
